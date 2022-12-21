@@ -15,6 +15,7 @@ public class TaskResponseConverts {
             return null;
         }
         TaskResponse taskResponse = new TaskResponse();
+        taskResponse.setId(task.getId());
         taskResponse.setTaskName(task.getTaskName());
         taskResponse.setTaskText(task.getTaskText());
         taskResponse.setDeadLine(task.getDeadLine());

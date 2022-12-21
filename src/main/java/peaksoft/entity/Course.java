@@ -57,7 +57,7 @@ public class Course {
             instructors = new ArrayList<>();
         }
         instructors.add(instructor);
-        instructor.plusStudent(this);
+//        instructor.plusStudent(this);
     }
 
     @OneToMany(cascade = {MERGE, REFRESH, DETACH, REMOVE, PERSIST}, fetch = LAZY, mappedBy = "course")

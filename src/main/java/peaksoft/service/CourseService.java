@@ -6,6 +6,7 @@ import peaksoft.dto.course.CourseResponse;
 import peaksoft.entity.Course;
 
 
+import java.io.IOException;
 import java.util.List;
 
 public interface CourseService {
@@ -13,7 +14,7 @@ public interface CourseService {
 
     List<CourseResponse> getAllCoursesById(Long companyId);
 
-    CourseResponse addCourse(Long companyId, CourseRequest courseRequest);
+    CourseResponse addCourse(Long companyId, CourseRequest courseRequest) throws IOException;
 
     CourseResponse getCourseById(Long id);
 

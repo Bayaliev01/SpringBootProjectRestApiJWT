@@ -13,11 +13,11 @@ public interface StudentService {
 
     List<StudentResponse> listAllStudents();
 
-    StudentResponse addStudent(Long id, StudentRequest studentRequest);
+    StudentResponse addStudent(Long id, StudentRequest studentRequest) throws IOException;
 
     StudentResponse getStudentById(Long id);
 
-    StudentResponse updateStudent(StudentRequest studentRequest, Long id);
+    StudentResponse updateStudent(StudentRequest studentRequest, Long id) throws IOException;
 
     StudentResponse deleteStudent(Long id);
 

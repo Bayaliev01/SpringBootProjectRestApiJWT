@@ -4,8 +4,10 @@ package peaksoft.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +31,8 @@ public class Task {
     private String taskText;
 
     @Column(name = "dead_line")
-    private String deadLine;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate deadLine;
 
     @ManyToOne(cascade = {MERGE,DETACH,REFRESH,PERSIST}, fetch = FetchType.EAGER)
     private Lesson lesson;

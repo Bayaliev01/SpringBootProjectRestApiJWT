@@ -1,8 +1,9 @@
 package peaksoft.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import peaksoft.dto.lesson.LessonRequest;
 import peaksoft.dto.lesson.LessonResponse;
 import peaksoft.entity.Course;
@@ -13,6 +14,7 @@ import peaksoft.repository.CourseRepository;
 import peaksoft.repository.LessonRepository;
 import peaksoft.service.LessonService;
 
+import java.net.http.HttpHeaders;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public LessonResponse addLesson(Long id, LessonRequest lessonRequest) {
-        Course course = courseRepository.findById(id).get();
+        Course course = getCourseId(id);
         Lesson lesson = lessonRequestConverts.createLesson(lessonRequest);
         course.addLesson(lesson);
         lesson.setCourse(course);
@@ -40,13 +42,13 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public LessonResponse getLessonById(Long id) {
-        Lesson lesson = lessonRepository.findById(id).get();
+        Lesson lesson = getLessonId(id);
         return lessonResponseConverts.viewLesson(lesson);
     }
 
     @Override
     public LessonResponse updateLesson(LessonRequest lessonRequest, Long id) {
-        Lesson lesson = lessonRepository.findById(id).get();
+        Lesson lesson = getLessonId(id);
         lessonRequestConverts.updateLesson(lesson, lessonRequest);
         lessonRepository.save(lesson);
         return lessonResponseConverts.viewLesson(lesson);
@@ -54,9 +56,16 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public LessonResponse deleteLesson(Long id) {
-        Lesson lesson = lessonRepository.findById(id).get();
+        Lesson lesson = getLessonId(id);
         lessonRepository.delete(lesson);
         return lessonResponseConverts.viewLesson(lesson);
+    }
+    private Course getCourseId(Long id){
+        return courseRepository.findById(id).orElseThrow(
+                ()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"Курс с такой id "+id+" не существует"));
+    }   private Lesson getLessonId(Long id){
+        return lessonRepository.findById(id).orElseThrow(
+                ()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"Lesson с такой id "+id+" не существует"));
     }
 }
 

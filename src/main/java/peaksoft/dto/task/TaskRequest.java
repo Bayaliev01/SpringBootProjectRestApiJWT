@@ -5,6 +5,8 @@ package peaksoft.dto.task;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Setter
 @Getter
 public class TaskRequest {
@@ -12,5 +14,5 @@ public class TaskRequest {
 
     private String taskText;
 
-    private String deadLine;
+    private LocalDate deadLine;
 }

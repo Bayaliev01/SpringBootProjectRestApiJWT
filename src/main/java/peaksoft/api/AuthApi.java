@@ -48,10 +48,6 @@ public class AuthApi {
         }
     }
 
-    @PostMapping("/registration")
-    public RegisterResponse create(@RequestBody RegisterRequest request) {
-        return userService.create(request);
-    }
 
     @GetMapping("/getAllUser")
     @PreAuthorize("isAuthenticated()")
@@ -67,13 +63,13 @@ public class AuthApi {
 
     @PutMapping("/updateUser/{id}")
     @PreAuthorize("hasAuthority('Admin')")
-    public RegisterResponse updateUser(@PathVariable Long id, @RequestBody RegisterRequest registerRequest) {
+    public RegisterResponse updateUser(@PathVariable Long id, @RequestBody RegisterRequest registerRequest) throws IOException {
         return userService.updateUser(id, registerRequest);
     }
 
     @DeleteMapping("/deleteUser/{id}")
     @PreAuthorize("hasAuthority('Admin')")
-    public RegisterResponse deleteUser(@PathVariable Long id) {
+    public RegisterResponse deleteUser(@PathVariable Long id) throws IOException {
         return userService.deleteUser(id);
     }
 

@@ -1,15 +1,16 @@
 package peaksoft.entity;
 
 
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 import static javax.persistence.CascadeType.*;
+import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
@@ -39,22 +40,18 @@ public class Instructor {
 
     private int students = 0;
 
-    public void plusStudent(Course course1){
-        for (Groups group : course1.getGroups()) {
-            for (Student student: group.getStudents()) {
-                students++;
-            }
-        }
-    }
 
-    public void plus(){
+    public void plus() {
         students++;
     }
 
-    public void minus(){
+    public void minus() {
         students--;
     }
 
     @ManyToOne(cascade = {MERGE, DETACH, REFRESH}, fetch = FetchType.EAGER)
     private Course course;
+
+    @OneToOne(cascade = ALL,fetch = EAGER)
+    private User user;
 }

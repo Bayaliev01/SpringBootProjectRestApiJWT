@@ -2,6 +2,7 @@ package peaksoft.entity;
 
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static javax.persistence.CascadeType.*;
+import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
@@ -40,4 +42,8 @@ public class Student {
 
     @ManyToOne(cascade = {MERGE, DETACH, REFRESH, PERSIST}, fetch = FetchType.EAGER)
     private Groups groups;
+
+    @JsonIgnore
+    @OneToOne(cascade = ALL,fetch = EAGER)
+    private User user;
 }

@@ -1,6 +1,7 @@
 package peaksoft.api;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.instructor.InstructorRequest;
 import peaksoft.dto.instructor.InstructorResponse;
@@ -16,7 +17,8 @@ public class InstructorApi {
     private final InstructorService instructorService;
 
     @PostMapping("/{courseId}/saveInstructor")
-    public InstructorResponse createInstructor(@PathVariable Long courseId, @RequestBody InstructorRequest instructorRequest) {
+    @PreAuthorize("hasAnyAuthority('Admin')")
+    public InstructorResponse createInstructor(@PathVariable Long courseId, @RequestBody InstructorRequest instructorRequest) throws IOException {
         return instructorService.addInstructor(courseId, instructorRequest);
     }
 
@@ -26,11 +28,13 @@ public class InstructorApi {
     }
 
     @PutMapping("/{instructorId}")
+    @PreAuthorize("hasAnyAuthority('Admin')")
     public InstructorResponse updateInstructor(@PathVariable Long instructorId, @RequestBody InstructorRequest instructorRequest) throws IOException {
         return instructorService.updateInstructor(instructorRequest, instructorId);
     }
 
     @DeleteMapping("/{instructorId}")
+    @PreAuthorize("hasAnyAuthority('Admin')")
     public InstructorResponse deleteInstructor(@PathVariable Long instructorId){
         return instructorService.deleteInstructor(instructorId);
     }
@@ -46,7 +50,9 @@ public class InstructorApi {
     }
 
     @PostMapping("/{courseId}/{instructorId}")
-    public InstructorResponse assignInstructorByCourseId(@PathVariable Long courseId, @PathVariable Long instructorId) throws IOException {
+    @PreAuthorize("hasAnyAuthority('Admin')")
+    public InstructorResponse assignInstructorByCourseId(@PathVariable Long courseId,
+                                                         @PathVariable Long instructorId) throws IOException {
         return instructorService.assignInstructor(courseId,instructorId);
     }
 }

@@ -2,11 +2,13 @@ package peaksoft.api;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.company.CompanyRequest;
 import peaksoft.dto.company.CompanyResponse;
 import peaksoft.service.CompanyService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -17,12 +19,14 @@ public class CompanyApi {
 
 
     @PostMapping
-    public CompanyResponse createCompany(@RequestBody CompanyRequest companyRequest) {
+    @PreAuthorize("hasAuthority('Admin')")
+    public CompanyResponse createCompany(@RequestBody CompanyRequest companyRequest) throws IOException {
         return companyService.addCompany(companyRequest);
     }
 
 
     @PutMapping("/{companyId}")
+    @PreAuthorize("hasAuthority('Admin')")
     public CompanyResponse updateCompany(@PathVariable Long companyId, @RequestBody CompanyRequest companyRequest) {
         return companyService.updateCompany(companyId, companyRequest);
     }
@@ -33,6 +37,7 @@ public class CompanyApi {
     }
 
     @DeleteMapping("/{companyId}")
+    @PreAuthorize("hasAuthority('Admin')")
     public CompanyResponse deleteCompany(@PathVariable Long companyId) {
         return companyService.deleteCompany(companyId);
     }

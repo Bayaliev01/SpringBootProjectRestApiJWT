@@ -1,7 +1,9 @@
 package peaksoft.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import peaksoft.dto.group.GroupRequest;
 import peaksoft.dto.group.GroupsResponse;
 import peaksoft.entity.*;
@@ -33,19 +35,20 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     public List<GroupsResponse> getAllGroupByCompanyId(Long id) {
+        Company company = getCompanyId(id);
         return groupResponseConverts.view(groupsRepository.findAllGroups(id));
     }
 
     @Override
     public List<GroupsResponse> getAllGroupsByCourseId(Long courseId) {
-        Course course = courseRepository.findById(courseId).get();
+        Course course = getCourseId(courseId);
         return groupResponseConverts.view(course.getGroups());
     }
 
     @Override
     public GroupsResponse addGroupByCourseId(Long id, Long courseId, GroupRequest groupRequest) {
-        Company company = companyRepository.findById(id).get();
-        Course course = courseRepository.findById(courseId).get();
+        Company company = getCompanyId(id);
+        Course course = getCourseId(courseId);
         Groups groups = groupRequestConverts.createGroup(groupRequest);
         company.addGroup(groups);
         groups.setCompany(company);
@@ -57,7 +60,7 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     public GroupsResponse addGroup(Long id, GroupRequest groupRequest) {
-        Course course = courseRepository.findById(id).get();
+        Course course = getCourseId(id);
         Groups groups = groupRequestConverts.createGroup(groupRequest);
         course.addGroup(groups);
         groups.addCourse(course);
@@ -67,19 +70,20 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     public GroupsResponse getGroupById(Long id) {
-        return groupResponseConverts.viewGroups(groupsRepository.findById(id).get());
+        Groups groups = getGroupsId(id);
+        return groupResponseConverts.viewGroups(groups);
     }
 
     @Override
     public GroupsResponse updateGroup(GroupRequest groupRequest, Long id) {
-        Groups groups = groupsRepository.findById(id).get();
+        Groups groups = getGroupsId(id);
         groupRequestConverts.updateGroup(groups, groupRequest);
         return groupResponseConverts.viewGroups(groupsRepository.save(groups));
     }
 
     @Override
     public GroupsResponse deleteGroup(Long id) {
-        Groups groups = groupsRepository.findById(id).get();
+        Groups groups = getGroupsId(id);
         for (Student s : groups.getStudents()) {
             groups.getCompany().minusStudent();
         }
@@ -102,12 +106,19 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     public GroupsResponse assignGroup(Long courseId, Long groupId) throws IOException {
-        Groups group = groupsRepository.findById(groupId).get();
-        Course course = courseRepository.findById(courseId).get();
+        Groups group = getGroupsId(groupId);
+        Course course = getCourseId(courseId);
         if (course.getGroups() != null) {
             for (Groups g : course.getGroups()) {
                 if (g.getId() == groupId) {
                     throw new IOException("This group already exists!");
+                }
+            }
+        }
+        if (course.getInstructors()!= null){
+            for (Instructor i: course.getInstructors()) {
+                for (Student s:group.getStudents()) {
+                    i.plus();
                 }
             }
         }
@@ -118,4 +129,21 @@ public class GroupsServiceImpl implements GroupsService {
         return groupResponseConverts.viewGroups(group);
     }
 
+    public Course getCourseId(Long id) {
+        return courseRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Курс с такой id " + id + " не существует"));
+    }
+
+    public Company getCompanyId(Long id) {
+        return companyRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Компания с такой id " + id + " не существует"));
+    }
+
+    public Groups getGroupsId(Long id) {
+        return groupsRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Группа с такой id " + id + " не существует"));
+    }
 }

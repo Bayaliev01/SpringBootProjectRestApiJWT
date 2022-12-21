@@ -1,11 +1,13 @@
 package peaksoft.api;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.course.CourseRequest;
 import peaksoft.dto.course.CourseResponse;
 import peaksoft.service.CourseService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -16,11 +18,13 @@ public class CourseApi {
 
 
     @PostMapping("/{companyId}/saveCourse")
-    public CourseResponse createCourse(@PathVariable Long companyId, @RequestBody CourseRequest courseRequest) {
+    @PreAuthorize("hasAuthority('Admin')")
+    public CourseResponse createCourse(@PathVariable Long companyId, @RequestBody CourseRequest courseRequest) throws IOException {
         return courseService.addCourse(companyId, courseRequest);
     }
 
     @PutMapping("/{courseId}")
+    @PreAuthorize("hasAuthority('Admin')")
     public CourseResponse updateCourse(@RequestBody CourseRequest courseRequest, @PathVariable Long courseId) {
         return courseService.updateCourse(courseRequest, courseId);
     }
@@ -31,6 +35,7 @@ public class CourseApi {
     }
 
     @DeleteMapping("/{courseId}")
+    @PreAuthorize("hasAuthority('Admin')")
     public CourseResponse deleteCourse(@PathVariable Long courseId) {
         return courseService.deleteCourse(courseId);
     }

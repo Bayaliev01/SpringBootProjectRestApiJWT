@@ -11,7 +11,7 @@ import java.util.List;
 public interface InstructorService {
     List<InstructorResponse> getAllInstructor(Long courseId);
 
-    InstructorResponse addInstructor(Long id, InstructorRequest instructorRequest);
+    InstructorResponse addInstructor(Long id, InstructorRequest instructorRequest) throws IOException;
 
     InstructorResponse getInstructorById(Long id);
 

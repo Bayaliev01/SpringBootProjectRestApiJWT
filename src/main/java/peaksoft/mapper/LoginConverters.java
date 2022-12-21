@@ -13,20 +13,20 @@ import java.util.Set;
 public class LoginConverters {
     public LoginResponse loginView(String token,
                                    String message,
-                                   User user){
+                                   User user) {
         var loginResponse = new LoginResponse();
-        if(user != null){
-            setAuthorite(loginResponse,user.getRoles());
+        if (user != null) {
+            setAuthorite(loginResponse, user.getRole());
         }
         loginResponse.setJwtToken(token);
         loginResponse.setMessage(message);
         return loginResponse;
     }
-    private void setAuthorite(LoginResponse loginResponse, List<Role> roles){
+
+    private void setAuthorite(LoginResponse loginResponse, Role role) {
         Set<String> authorities = new HashSet<>();
-        for(Role role : roles){
-            authorities.add(role.getRoleName());
-        }
+        authorities.add(role.getRoleName());
         loginResponse.setAuthorities(authorities);
     }
-}
+    }
+

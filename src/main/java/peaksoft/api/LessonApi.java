@@ -1,6 +1,7 @@
 package peaksoft.api;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.lesson.LessonRequest;
 import peaksoft.dto.lesson.LessonResponse;
@@ -16,11 +17,13 @@ public class LessonApi {
 
 
     @PostMapping("/{courseId}/saveLesson")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Instructor')")
     public LessonResponse createLesson(@PathVariable Long courseId, @RequestBody LessonRequest lessonRequest) {
         return lessonService.addLesson(courseId, lessonRequest);
     }
 
     @PutMapping("/{lessonId}")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Instructor')")
     public LessonResponse updateLesson(@PathVariable Long lessonId, @RequestBody LessonRequest lessonRequest) {
         return lessonService.updateLesson(lessonRequest, lessonId);
     }
@@ -31,6 +34,7 @@ public class LessonApi {
     }
 
     @DeleteMapping("/{lessonId}")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Instructor')")
     public LessonResponse deleteLesson(@PathVariable Long lessonId) {
         return lessonService.deleteLesson(lessonId);
     }

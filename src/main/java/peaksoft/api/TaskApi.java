@@ -1,6 +1,7 @@
 package peaksoft.api;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.task.TaskRequest;
 import peaksoft.dto.task.TaskResponse;
@@ -10,22 +11,25 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/task")
+@RequestMapping("/api/task")
 public class TaskApi {
     private final TaskService taskService;
 
 
     @PostMapping("/{lessonId}/saveTask")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Instructor')")
     public TaskResponse createTask(@PathVariable Long lessonId, @RequestBody TaskRequest taskRequest) {
         return taskService.addTask(lessonId, taskRequest);
     }
 
     @PutMapping("/{taskId}")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Instructor')")
     public TaskResponse updateTask(@PathVariable Long taskId, @RequestBody TaskRequest taskRequest) {
         return taskService.updateTask(taskRequest, taskId);
     }
 
     @DeleteMapping("/{taskId}")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Instructor')")
     public TaskResponse deleteTask(@PathVariable Long taskId) {
         return taskService.deleteTask(taskId);
     }

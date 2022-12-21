@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import static javax.persistence.CascadeType.*;
@@ -23,6 +25,9 @@ public class Role {
     private Long id;
     private String roleName;
 
-    @ManyToMany(targetEntity = User.class, mappedBy = "roles", cascade = {DETACH, MERGE, REFRESH})
-    private List<User> users;
+    //  "  @ManyToMany(targetEntity = User.class, mappedBy = "roles", cascade = {DETACH, MERGE, REFRESH})
+//    private List<User> users;
+    @OneToMany(cascade = {MERGE, REFRESH, DETACH}, mappedBy = "role")
+    private List<User> users = new ArrayList<>();
+
 }

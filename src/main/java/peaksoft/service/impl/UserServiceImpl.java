@@ -1,11 +1,13 @@
 package peaksoft.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import peaksoft.dto.jwt.RegisterRequest;
 import peaksoft.dto.jwt.RegisterResponse;
 import peaksoft.entity.Role;
@@ -16,7 +18,6 @@ import peaksoft.repository.UserRepository;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -26,20 +27,12 @@ public class UserServiceImpl implements UserDetailsService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public RegisterResponse create(RegisterRequest request) {
-        User user = mapToEntity(request);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        Role role = roleRepository.findById(3L).get();
-        user.setRoles(Arrays.asList(role));
-        userRepository.save(user);
-        return mapToResponse(user);
-    }
 
     private User mapToEntity(RegisterRequest request) {
         User user = new User();
         user.setEmail(request.getEmail());
-        user.setFirstName(request.getFirstName());
         user.setPassword(request.getPassword());
+        user.setFirstName(request.getFirstName());
         return user;
     }
 
@@ -68,44 +61,38 @@ public class UserServiceImpl implements UserDetailsService {
 
     @PostConstruct
     public void initMethod() {
-        Role role1 = new Role();
-        role1.setRoleName("Admin");
+        if (roleRepository.findAll().size() == 0 && roleRepository.findAll().size() == 0) {
+            Role role1 = new Role();
+            role1.setRoleName("Admin");
 
-        Role role2 = new Role();
-        role2.setRoleName("Instructor");
+            Role role2 = new Role();
+            role2.setRoleName("Instructor");
 
-        Role role3 = new Role();
-        role3.setRoleName("Student");
+            Role role3 = new Role();
+            role3.setRoleName("Student");
 
-        RegisterRequest request = new RegisterRequest();
-        request.setEmail("esen@gmail.com");
-        request.setPassword(passwordEncoder.encode("1234"));
-        request.setFirstName("Esen");
+            RegisterRequest request = new RegisterRequest();
+            request.setEmail("esen@gmail.com");
+            request.setPassword(passwordEncoder.encode("1234"));
+            request.setFirstName("Esen");
 
-        RegisterRequest request2 = new RegisterRequest();
-        request2.setEmail("Muhammed@gmail.com");
-        request2.setPassword(passwordEncoder.encode("1234"));
-        request2.setFirstName("Muhammed");
+            User user2 = mapToEntity(request);
 
-        User user2 = mapToEntity(request);
-        User user3 = mapToEntity(request2);
+            user2.setRole(role1);
+            role1.getUsers().add(user2);
 
-        user2.setRoles(Arrays.asList(role1));
-        role1.setUsers(Arrays.asList(user2));
-
-        user3.setRoles(Arrays.asList(role2));
-        role2.setUsers(Arrays.asList(user3));
-
-        userRepository.save(user2);
-        userRepository.save(user3);
-        roleRepository.save(role1);
-        roleRepository.save(role2);
-        roleRepository.save(role3);
+            userRepository.save(user2);
+            roleRepository.save(role1);
+            roleRepository.save(role2);
+            roleRepository.save(role3);
+        }
     }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("not found email"));
+        return userRepository.findByEmail(username).
+                orElseThrow(() -> new UsernameNotFoundException("not found email"));
     }
 
     public List<RegisterResponse> getAllUsers() {
@@ -113,34 +100,47 @@ public class UserServiceImpl implements UserDetailsService {
     }
 
     public RegisterResponse getUserById(Long id) {
-        return mapToResponse(userRepository.findById(id).get());
+        return mapToResponse(getUserId(id));
     }
 
-    public RegisterResponse updateUser(Long id, RegisterRequest userRequest) {
-        User user = userRepository.findById(id).get();
+    public RegisterResponse updateUser(Long id, RegisterRequest userRequest) throws IOException {
+
+        User user = getUserId(id);
+        if (user.getRole().getRoleName().equals("Instructor") ||
+                user.getRole().getRoleName().equals("Student")) {
+            throw new IOException("You can update instructor/student in another collention");
+        }
         if (userRequest.getEmail() != null)
             user.setEmail(userRequest.getEmail());
         if (userRequest.getPassword() != null)
-            user.setFirstName(userRequest.getFirstName());
-        if (userRequest.getFirstName() != null)
             user.setPassword(userRequest.getPassword());
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        userRepository.save(user);
         return mapToResponse(user);
     }
 
-    public RegisterResponse deleteUser(Long id) {
-        User user = userRepository.findById(id).get();
+    public RegisterResponse deleteUser(Long id) throws IOException {
+        User user = getUserId(id);
+        if (user.getRole().getRoleName().equals("Admin")) {
+            throw new IOException("Вы не можете удалить администратора");
+        }
         userRepository.delete(user);
         return mapToResponse(user);
     }
 
     public RegisterResponse changeRole(Long roleId, Long userId) throws IOException {
-        User user = userRepository.findById(userId).get();
-        Role role = roleRepository.findById(roleId).get();
-        if (role.getRoleName().equalsIgnoreCase("admin")) {
+        User user = getUserId(userId);
+        Role role = getRoleId(roleId);
+
+        if (role.getRoleName().equals(("Admin"))) {
             throw new IOException("only 1 user can be admin");
         }
 
-        user.getRoles().add(role);
+        if (user.getRole().getRoleName().equals(role.getRoleName())) {
+            throw new IOException("this user already have this role");
+        }
+
+        user.setRole(role);
         role.getUsers().add(user);
 
         userRepository.save(user);
@@ -148,4 +148,15 @@ public class UserServiceImpl implements UserDetailsService {
 
         return mapToResponse(user);
     }
+
+    private User getUserId(Long id) {
+        return userRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User с такой id " + id + " не существует"));
+    }
+
+    private Role getRoleId(Long id) {
+        return roleRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role с такой id " + id + " не существует"));
+    }
+
 }

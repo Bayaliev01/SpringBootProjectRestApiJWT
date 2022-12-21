@@ -5,13 +5,14 @@ import peaksoft.dto.company.CompanyResponse;
 import peaksoft.entity.Company;
 
 
+import java.io.IOException;
 import java.util.List;
 
 public interface CompanyService {
 
     List<CompanyResponse> getAllCompanies();
 
-    CompanyResponse addCompany(CompanyRequest companyRequest);
+    CompanyResponse addCompany(CompanyRequest companyRequest) throws IOException;
 
     CompanyResponse getCompanyById(Long id);
 
